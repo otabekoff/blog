@@ -1,0 +1,663 @@
+Vuex - chuqur sho'ng'in
+Mundarija
+Nima uchun Vuex?
+Vuex-ni o'rnatish
+Do'kon haqida tushuncha
+Shtat
+Qabul qiluvchilar
+Mutatsiyalar
+Amallar
+Do'konga tuzilma qo'shish
+Modullar
+Xulosa
+
+
+Vuex - Vue.js ilovalaridagi ma'lumotlarni boshqarish uchun Vue jamoasi tomonidan qurilgan davlat boshqaruvi kutubxonasi.
+Bu dastur davomida ishlatiladigan ma'lumotlarni boshqarish va o'qish va yozishni oson bajarish uchun markazlashtirilgan
+usulni taqdim etadi.
+
+#Nima uchun Vuex?
+Vue qarashlarni tarkibiy qismlarga ajratishni targ'ib qiladi. Ushbu komponentlar ma'lumotlar, usullar va hokazolarni
+qabul qiladigan qayta ishlatilishi mumkin bo'lgan Vue misollari bo'lib, ma'lumotlar ko'rinishning holati joylashtirilgan
+joyda joylashgan bo'lib, usul bu ko'rinishni foydalanuvchining o'zaro ta'siriga asoslangan holda boshqarishga imkon
+beradi.
+
+Agar foydalanuvchi komponentdagi tugmachani bosgan bo'lsa, usul chaqiriladi, bu esa o'z navbatida aytilgan holat
+bo'yicha harakatni amalga oshiradi, shu holat ushbu o'zgarish haqidagi ko'rinishni yangilaydi.
+
+Shu bilan birga, bir nechta tarkibiy qism holatni baham ko'rishi kerak bo'lgan holatlar mavjud, yoki bitta komponentda
+holat o'zgartirilgandan so'ng, siz amalni bajarish uchun ota-ona / bola yoki birodar komponentga ehtiyoj sezasiz.
+
+Bu ikkinchi komponent holatiga qarab, siz ham foydalanishga qaror mumkin props yoki this.$parent bevosita ma'lumotlarni
+yoki ikkinchi komponent usullarini kirish uchun kalit so'z va dedi amalni bajarish. Ammo buni iloji boricha ko'proq
+tarkibiy qismlar uchun qilishingiz kerak bo'lsa-chi?
+
+Loyiha kattalashib borishi bilan siz o'zingizni rekvizitlardan o'tayotganingizni va turli xil komponentlarga kirish
+uchun DOMni to'g'ridan-to'g'ri boshqarayotganingizni ko'rasiz.
+
+Ushbu yondashuv juda zerikarli bo'lib, xatolar yuz berganda kod bazasini saqlab qolish yoki disk raskadrovka qilishni
+qiyinlashtiradi. Bu Vuex nashrida edi. U turli xil tarkibiy qismlar o'rtasida bo'lishadigan barcha holatlarni
+joylashtirishingiz mumkin bo'lgan global miqyosni taqdim etadi.
+
+Shuningdek, bu bizning kodimizga ko'proq tuzilish beradi, disk raskadrovka jarayonini osonlashtiradi, chunki biz
+DevTools-dan foydalanib yuzaga kelgan xatolarni kuzatib boramiz va, albatta, Vue stolga keltiradigan reaktivlikni
+ta'minlaydi. Buni JavaScript-dagi derazalar deb o'ylang --- har bir komponent unga kirish huquqiga ega.
+
+#Vuex-ni o'rnatish
+Vuex-ni loyihaga o'rnatish uchun quyidagi kodni ishga tushiring.
+
+npm install vuex --save
+Bu sizning loyihangizga Vuex-ning so'nggi versiyasini o'rnatadi. Bu amalga oshirilgandan so'ng, biz Vuex-ni quyidagi kod
+bilan store.js faylini yaratib, Vue dasturiga ishga tushirishimiz kerak;
+
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+Vue.use(Vuex)
+Endi do'kon yaratishga kirishishimiz mumkin. Do'kon, asosan, dastur holatini, getterlarni, mutatsiyalarni va
+harakatlarni ushlab turadigan reaktiv ob'ektdir.
+
+#Do'kon haqida tushuncha
+Do'kon, asosan, markazlashtirilgan davlat bo'lib, unda ushbu markazlashuvga erishishga imkon beradigan ba'zi asosiy
+tushunchalar mavjud. Ushbu tushunchalarga quyidagilar kiradi:
+
+Shtat
+Qabul qiluvchilar
+Mutatsiyalar
+Amallar
+#Shtat
+Bu butun ma'lumotlarni o'z ichiga olgan bitta ob'ekt. Bu data bitta komponentlar tarkibidagi kalit so'zga o'xshaydi ,
+faqat ushbu holatga bir nechta komponentlardan kirish mumkin va agar ushbu holat yangilangan bo'lsa, unga kiradigan
+barcha komponentlar ham ushbu o'zgarishni oladi. Ushbu ob'ektni yaratish uchun biz quyidagilarni qilamiz:
+
+// import Vue
+import Vue from 'vue';
+// import Vuex
+import Vuex from 'vuex';
+
+// Install the Vuex plugin on vue
+Vue.use(Vuex);
+
+// create a Vuex store instance
+export const store = new Vuex.Store({
+state: {
+cart: ''
+}
+})
+Vuex holatiga bizning Vue komponentlarimizga kirish uchun avval do'konni aytilgan holatni qaytaradigan, keyin esa ushbu
+holatni ko'rinishga keltiradigan hisoblash xususiyatini yaratish orqali tarkibiy qismga import qilishimiz kerak bo'ladi.
+
+Endi do'konni import qilaylik. Buning ikkita asosiy usuli mavjud:
+
+Vuex holatidan foydalanmoqchi bo'lgan har bir komponentdagi do'konni qo'lda import qilish, quyidagicha:
+
+<template>
+    <main>
+        <h1>Cart Content</h1>
+        <p>{{cartValue}}</p>
+    </main>
+</template>
+
+<script>
+    // Import Vuex Store into Component
+    import store from 'store.js';
+    export default {
+        computed: {
+            cartValue() {
+                // Return Vuex state from store
+                return store.state.cart;
+            }
+        }
+    }
+</script>
+
+Vuex do'konining Vue Instance-ga global in'ektsiyasini amalga oshirish, bu bizga avtomatik ravishda this.$store
+sintaksis yordamida dasturdagi barcha Vue komponentlaridan do'konga murojaat qilish imkoniyatini beradi :
+
+import Vue from 'vue';
+import store from './store.js';
+
+new Vue({
+// Adding the Vuex store to the Vue instance
+store,
+}).$mount('#app');
+
+<template>
+    <main>
+        <h1>Cart Content</h1>
+        <p>{{cartValue}}</p>
+    </main>
+</template>
+
+<script>
+    export default {
+        computed: {
+            cartValue() {
+                // Accessing the Vuex state
+                return this.$store.state.cart;
+            }
+        }
+    }
+</script>
+
+#Qabul qiluvchilar
+Getterlar Vuex do'koni uchun juda ko'p hisoblangan xususiyatlardir. Ular bizni hozirgi holatga qarab yangi holatni
+yaratishga imkon beradi --- masalan, aravada qancha narsalar borligini hisoblash.
+
+Bundan tashqari, bu kodning takrorlanishini kamaytirishga yordam beradi, agar ideal holda bir nechta komponentlar ushbu
+ma'lumotlarga muhtoj bo'lsa va biz odatda har bir komponentda manipulyatsiya qilishimiz kerak bo'lsa. Getters yordamida
+biz buni bir marta va istalgan joyga murojaat qilishimiz mumkin.
+
+Qabul qiluvchini yaratish uchun biz quyidagilarni qilamiz:
+
+// import Vue
+import Vue from 'vue';
+// import Vuex
+import Vuex from 'vuex';
+
+// Install the Vuex plugin on vue
+Vue.use(Vuex);
+
+// create a Vuex store instance
+export const store = new Vuex.Store({
+state: {
+cart: ["bread", "rice", "beans", "turkey"]
+},
+
+getters: {
+// Fetch the total number of items in the cart
+totalNumberOfCartItems: state => {
+return state.cart.length;
+},
+},
+})
+
+So'ngra, biz Vue komponentidan quyidagilarni bajaramiz:
+
+<template>
+    <main>
+        <h1>Cart Content</h1>
+        <p>Total Number of Items: {{totalNumberOfCartItems}}</p>
+    </main>
+</template>
+
+<script>
+    export default {
+        computed: {
+            totalNumberOfCartItems() {
+                // Accessing the Vuex state
+                return this.$store.getters.totalNumberOfCartItems;
+            }
+        }
+    }
+</script>
+
+Endi, har safar buyum savatga qo'shilsa, savatdagi narsalarning umumiy soni avtomatik ravishda yangilanadi.
+
+#Mutatsiyalar
+Mutatsiyalar - bu Vuex holatini yangilashning yagona usuli. Ular bitta vazifani va bitta vazifani bajaradilar: holatni
+o'rnatish. Bu ikkita argumentni qabul qiladigan funktsiya, davlat va foydali yuk, bu erda foydali yuk shart emas.
+
+Yuk ko'tarish - bu shunchaki holatni yangilash uchun foydalaniladigan ma'lumotlar. Mutatsiyalar sinxrondir va shuning
+uchun biz ularda asenkron vazifani bajara olmaymiz.
+
+Keling, kodimizga mutatsiya qo'shaylik:
+
+// import Vue
+import Vue from 'vue';
+// import Vuex
+import Vuex from 'vuex';
+
+// Install the Vuex plugin on vue
+Vue.use(Vuex);
+
+// create a Vuex store instance
+export const store = new Vuex.Store({
+state: {
+cart: ["bread", "rice", "beans", "turkey"]
+},
+
+getters: {
+// Fetch the total number of items in the cart
+totalNumberOfCartItems: state => {
+return state.cart.length;
+},
+},
+
+mutations: {
+// Add item to cart
+addItemToCart (state, payload) {
+state.cart.push(payload);
+},
+},
+})
+
+Keyinchalik, biz Vue komponentidan holatni yangilashimiz kerak va buning uchun mutatsiyani amalga oshirishimiz kerak
+bo'ladi.
+
+<template>
+    <main>
+        <h1>Cart Content</h1>
+        <p>Total Number of Items: {{totalNumberOfCartItems}}</p>
+        <form @submit.prevent="addItemToCart">
+            <input type="text" v-model="item" required>
+            <button type="submit">Add to cart</button>
+        </form>
+    </main>
+</template>
+
+<script>
+    export default {
+        data() {
+            return {
+                item: ''
+            }
+        },
+        computed: {
+            totalNumberOfCartItems() {
+                // Accessing the Vuex state
+                return this.$store.getters.totalNumberOfCartItems;
+            }
+        },
+        methods: {
+            addItemToCart() {
+                // Check that the input field isn't empty
+                if (this.item !== '') {
+                    // commiting the additemtocart mutation with the payload
+                    this.$store.commit('addItemToCart', this.item)
+                }
+            }
+        }
+    }
+</script>
+Endi foydalanuvchi har qanday vaqtda kiritishga qiymat kiritadi va yuborish tugmachasini bosadi, bu narsa savatga
+qo'shiladi va savatdagi narsalarning umumiy soni ko'rinishda yangilanadi.
+
+#Amallar
+Harakatlar mutatsiyalarga o'xshaydi, ammo holatni mutatsiya qilish o'rniga ular mutatsiyalarni amalga oshiradilar. Ular
+asenkron va shunga o'xshash, bizni asenkron vazifalarni bajarishga imkon beradi; ushbu vazifalar bajarilgandan so'ng,
+biz mutatsiyani amalga oshirishga kirishamiz, bu esa o'z navbatida holatni yangilaydi.
+
+Amallarni namoyish qilish uchun biz savat elementlarini API-ga yuborishni davom ettiramiz.
+
+// import Vue
+import Vue from 'vue';
+// import Vuex
+import Vuex from 'vuex';
+
+// Install the Vuex plugin on vue
+Vue.use(Vuex);
+
+// create a Vuex store instance
+export const store = new Vuex.Store({
+state: {
+cart: ["bread", "rice", "beans", "turkey"]
+},
+
+getters: {
+// Fetch the total number of items in the cart
+totalNumberOfCartItems: state => {
+return state.cart.length;
+},
+},
+
+mutations: {
+// Add item to cart
+addItemToCart (state, payload) {
+state.cart.push(payload);
+},
+// Clear items in the cart
+emtpyCart (state) {
+state.cart = [];
+}
+},
+
+actions: {
+checkout({commit}, requestObject) {
+// API Call to submit the items in the cart
+Vue.http.post('submit', requestObject).then((response) => {
+// log success
+console.log(response);
+// Clear Cart by mutating the state
+commit('emptyCart');
+}).catch((error) => {
+// log error
+console.log(error);
+}
+}
+}
+})
+
+Yuqoridagi kodga qarab, biz checkout ikkita narsani qabul qiladigan harakatni yaratdik :
+
+commit: bu bizning harakatlarimiz ichida bajarish usulini chaqirishga imkon beradi
+requestObject: bu bizga ma'lumotlarni amalda o'tkazishga imkon beradi
+Amalga o'tishda biz API-ga asenkron qo'ng'iroq qildik va keyin API-ga o'tdik requestObject . Muvaffaqiyatli bo'lganida,
+biz javobni yozib oldik, so'ngra aravaning holatini tozalashga kirishdik, lekin avval emptyCart mutatsiya yaratishimiz
+kerak edi , uning yagona vazifasi arava holatini bo'shatishdir.
+
+Endi biz qanday qilib harakatlarni yaratishni ko'rdik, biz ushbu harakatni boshlashga kirishamiz. Amalni boshlash uchun
+Vuex bizga dispatch buyruq beradi.
+
+this.$store.dispatch('actionName', payload);
+
+Keling, kodimizga amal qo'shib, uni ko'rinishdan yuboramiz:
+
+<template>
+    <main>
+        <h1>Cart Content</h1>
+        <p>Total Number of Items: {{totalNumberOfCartItems}}</p>
+        <form @submit.prevent="addItemToCart">
+            <input type="text" v-model="item" required>
+            <button type="submit">Add to cart</button>
+        </form>
+
+        <button type="button" @click="checkout">Checkout</button>
+    </main>
+</template>
+
+<script>
+    export default {
+        data() {
+            return {
+                item: ''
+            }
+        },
+        computed: {
+            totalNumberOfCartItems() {
+                // Accessing the Vuex state
+                return this.$store.getters.totalNumberOfCartItems;
+            }
+        },
+        methods: {
+            addItemToCart() {
+                // Check that the input field isn't empty
+                if (this.item !== '') {
+                    // commiting the additemtocart mutation with the payload
+                    this.$store.commit('addItemToCart', this.item)
+                }
+            },
+
+            checkout() {
+                // Make sure cart is not empty
+                if (this.totalNumberOfCartItems > 0) {
+                    // create request
+                    let requestPayload = { cart: this.$store.state.cart };
+                    // Dispatch the action
+                    this.$store.dispatch('checkout', requestPayload);
+                }
+                else {
+                    alert('Cart is empty');
+                }
+            }
+        }
+    }
+</script>
+
+Yuqoridagi kod asosida biz ko'rinishda to'lov tugmachasini yaratdik va elementlarni yuboradigan amalni jo'natishga
+urinishdan oldin savat bo'sh emasligini tekshiradigan to'lov usulini yaratdik.
+
+Bu ishlaydi, lekin bir narsa etishmayapti. Siz nima deb o'ylashingiz mumkin? Biz biron bir harakatni jo'nata oldik, ammo
+bu harakat muvaffaqiyatli yoki yo'qligini bilmaymiz.
+
+API chaqiruvi muvaffaqiyatsiz tugadimi? O'tdimi? Ushbu ma'lumotni qanday qilib olishim mumkin, shunda foydalanuvchini
+xabardor qilishim mumkin? Amallar va'dalarni bajarishi mumkin va shuningdek, va'dani qaytarishi mumkin.
+
+Va'dani qaytarish uchun bizning misol kodimizni o'zgartirish:
+
+// import Vue
+import Vue from 'vue';
+// import Vuex
+import Vuex from 'vuex';
+
+// Install the Vuex plugin on vue
+Vue.use(Vuex);
+
+// create a Vuex store instance
+export const store = new Vuex.Store({
+state: {
+cart: ["bread", "rice", "beans", "turkey"]
+},
+
+getters: {
+// Fetch the total number of items in the cart
+totalNumberOfCartItems: state => {
+return state.cart.length;
+},
+},
+
+mutations: {
+// Add item to cart
+addItemToCart (state, payload) {
+state.cart.push(payload);
+},
+// Clear items in the cart
+emtpyCart (state) {
+state.cart = [];
+}
+},
+
+actions: {
+checkout({commit}, requestObject) {
+return new Promise((resolve, reject) => {
+
+// API Call to submit the items in the cart
+Vue.http.post('submit', requestObject).then((response) => {
+// log success
+console.log(response);
+// Clear Cart by mutating the state
+commit('emptyCart');
+// return success
+resolve(response);
+}).catch((error) => {
+// log error
+console.log(error);
+// return error
+reject(error);
+}
+})
+}
+}
+})
+
+Endi biz foydalanuvchini ko'rinishdagi holatni quyidagicha yangilash uchun qaytarilgan qiymatdan foydalanishimiz mumkin:
+
+<template>
+    <main>
+        <h1>Cart Content</h1>
+        <p>Total Number of Items: {{totalNumberOfCartItems}}</p>
+        <form @submit.prevent="addItemToCart">
+            <input type="text" v-model="item" required>
+            <button type="submit">Add to cart</button>
+        </form>
+
+        <button type="button" @click="checkout">Checkout</button>
+    </main>
+</template>
+
+<script>
+    export default {
+        data() {
+            return {
+                item: ''
+            }
+        },
+        computed: {
+            totalNumberOfCartItems() {
+                // Accessing the Vuex state
+                return this.$store.getters.totalNumberOfCartItems;
+            }
+        },
+        methods: {
+            addItemToCart() {
+                // Check that the input field isn't empty
+                if (this.item !== '') {
+                    // commiting the additemtocart mutation with the payload
+                    this.$store.commit('addItemToCart', this.item)
+                }
+            },
+
+            checkout() {
+                // Make sure cart is not empty
+                if (this.totalNumberOfCartItems > 0) {
+                    // create request
+                    let requestPayload = { cart: this.$store.state.cart };
+                    // Dispatch the action
+                    this.$store.dispatch('checkout', requestPayload).then((response) => {
+                        // Alert Response from API
+                        alert(response);
+                    }).catch((error) => {
+                        // Alert Error from API
+                        alert(error);
+                    });
+                }
+                else {
+                    alert('Cart is empty');
+                }
+            }
+        }
+    }
+</script>
+
+Amallar, shuningdek, bir nechta harakatlarni yuborishga imkon beradi (ya'ni, harakat bir yoki bir nechta boshqa
+harakatlarni yuborishi mumkin). Siz qilishingiz kerak bo'lgan yagona narsa - dispatch bu argument sifatida o'tish va siz
+o'zingizning harakatingizdagi boshqa harakatlarni yuborishingiz mumkin.
+
+checkout({ dispatch, commit }, requestObject) {
+// dispatch an action
+dispatch('actionName');
+
+// dispatch another action
+dispatch('actionName2', request);
+};
+
+#Do'konga tuzilma qo'shish
+Hozir bizda barcha holatlar, getterlar, mutatsiyalar va harakatlar barchasi bitta faylda, store.js faylida. Bizning kod
+bazamiz qanchalik katta bo'lishiga qarab, bu fayl juda katta bo'lib ketishi mumkin va biz buni alohida fayllarga
+ajratishimiz maqsadga muvofiqdir.
+
+store/
+--| store.js
+--| state.js
+--| getters.js
+--| mutations.js
+--| actions.js
+
+Endi bizning do'konimiz quyidagicha ko'rinadi:
+
+import Vue from 'vue'
+import Vuex from 'vuex'
+import state from './state'
+import getters from './getters'
+import mutations from './mutations'
+import actions from './actions'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+state,
+getters,
+mutations,
+actions
+})
+
+#Modullar
+Vuex bizni modullar bilan ta'minlaydi, bu erda biz do'konimizni tuzishimiz yoki kichik do'konlarning modullariga
+ajratishimiz mumkin. Har bir modulning o'z holati, getterlari, mutatsiyalari va harakatlari bo'ladi.
+
+Bu modulga bog'liq holatlarni, getterlarni, mutatsiyalarni va harakatlarni guruhlash orqali ishlaydi. Bu, asosan, bizda
+keng ko'lamli dastur mavjud bo'lganda va do'kon juda ko'p miqdordagi kod bilan shishganida foydalidir.
+
+Bizning do'konni modulga qayta tiklab , biz cart.js nomli faylni yaratamiz va do'konimizdagi savat bilan bog'liq barcha
+holatlarimizni, mutatsiyalarimizni va harakatlarimizni quyidagicha boshlaymiz :
+
+// import Vue
+import Vue from 'vue';
+
+export default {
+state: {
+cart: ["bread", "rice", "beans", "turkey"]
+},
+
+getters: {
+// Fetch the total number of items in the cart
+totalNumberOfCartItems: state => {
+return state.cart.length;
+},
+},
+
+mutations: {
+// Add item to cart
+addItemToCart (state, payload) {
+state.cart.push(payload);
+},
+// Clear items in the cart
+emtpyCart (state) {
+state.cart = [];
+}
+},
+
+actions: {
+checkout({commit}, requestObject) {
+return new Promise((resolve, reject) => {
+
+// API Call to submit the items in the cart
+Vue.http.post('submit', requestObject).then((response) => {
+// log success
+console.log(response);
+// Clear Cart by mutating the state
+commit('emptyCart');
+// return success
+resolve(response);
+}).catch((error) => {
+// log error
+console.log(error);
+// return error
+reject(error);
+}
+})
+}
+}
+}
+
+Keyin biz uni asosiy do'konimizga import qilamiz va ro'yxatdan o'tkazamiz.
+
+import Vue from 'vue'
+import Vuex from 'vuex'
+import state from './state'
+import getters from './getters'
+import mutations from './mutations'
+import actions from './actions'
+import cart from './modules/cart'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+state,
+getters,
+mutations,
+actions,
+modules: {
+cart
+}
+})
+
+JavaScript
+
+Va nihoyat, bizning kod tuzilma shunday bo'ladi:
+
+store/
+--| store.js
+--| state.js
+--| getters.js
+--| mutations.js
+--| actions.js
+--| modules/
+--| cart.js
+
+#Xulosa
+Vuex do'konlar yaratadi, ular shtatlar, getterlar, mutatsiyalar va harakatlardan iborat. Vaziyatni yangilash yoki
+o'zgartirish uchun siz mutatsiya qilishingiz kerak.
+
+Asenkron vazifani bajarish uchun sizga harakat kerak. Amallar yuboriladi, ular muvaffaqiyatga erishish natijasida
+holatni mutatsiyaga olib keladigan mutatsiyani amalga oshiradilar va shu bilan ko'rinishni yangilaydilar.

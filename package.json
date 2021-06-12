@@ -1,0 +1,27 @@
+{
+  "name": "beklog",
+  "version": "0.0.1",
+  "description": "BekLog - Official and Personal blog of Otabek Sadiridinov",
+  "main": "index.js",
+  "authors": {
+    "name": "Otabek Sadiridinov",
+    "email": "sadiridinovotabek@gmail.com"
+  },
+  "repository": "https://github.com/otabeksadiridinov.github.io/beklog",
+  "scripts": {
+    "dev": "vuepress dev src",
+    "build": "vuepress build src"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@vuepress/plugin-back-to-top": "^1.8.2",
+    "vuepress": "^1.5.3",
+    "vuepress-plugin-container": "^2.1.5",
+    "vuepress-plugin-medium-zoom": "^1.1.9",
+    "vuepress-plugin-smooth-scroll": "^0.0.10",
+    "vuepress-theme-blog-vuetify": "^1.6.2"
+  },
+  "dependencies": {
+    "vuepress-plugin-glossary": "^1.0.2"
+  }
+}
